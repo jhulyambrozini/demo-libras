@@ -17,7 +17,7 @@ async function createDetector() {
 async function callDetector() {
 
   const detector = await createDetector()
-  console.log("mediaPose model loaded")
+  console.log("detctando sinal")
   const card = document.querySelector('.card')
   card.innerHTML = '<p>tente fazer o sinal</p>'
 
@@ -25,7 +25,7 @@ async function callDetector() {
 }
 
 const video = document.querySelector("#pose-video")
-  
+
 // configure gesture estimator
 // add "✌🏻" and "👍" as sample gestures
 const knownGestures = [
@@ -38,37 +38,37 @@ const knownGestures = [
 const GE = new fp.GestureEstimator(knownGestures)
 // load handpose model
 
+// main loop
+async function estimateHands() {
 
-  // main loop
-  async function estimateHands () {
+  // pegando dados da mão no video
+  const hands = await callDetector().then(resp => resp.estimateHands(video, {
+    flipHorizontal: true
+  }))
 
-    // pegando landmarks da mão no video
-    const hands = await callDetector().then(resp => resp.estimateHands(video, {
-      flipHorizontal: true
-    }))
+  // loop pra pegar nome do sinal feito
+  for (const hand of hands) {
 
-    
+    const keypoints3D = hand.keypoints3D.map(keypoint => [keypoint.x, keypoint.y, keypoint.z])
+    const est = GE.estimate(keypoints3D, 9)
 
-    // adicionando cor aos landmarks
-    for (const hand of hands) {
+    if (!est.gestures.length) continue
+    // find gesture with highest match score
+    let result = est.gestures.reduce((prev, cont) => {
+      return (prev.score > cont.score) ? prev : cont
+    })
+    let nomeDoSinal = result.name
 
-      const keypoints3D = hand.keypoints3D.map(keypoint => [keypoint.x, keypoint.y, keypoint.z])
-      const est = GE.estimate(keypoints3D, 9)
-
-      if (!est.gestures.length) continue
-        // find gesture with highest match score
-      let result = est.gestures.reduce((prev, cont) => {
-          return (prev.score > cont.score) ? prev : cont
-        })
-
-        let nomeDoSinal = result.name
-        
-      //  console.log(nomeDoSinal)
-    //  return nomeDoSinal
-    }
-    // ...and so on
-    setTimeout(() => { estimateHands() }, 1000 / config.video.fps)
+    let card = document.querySelector('.card')
+    card.innerText = nomeDoSinal
+    return nomeDoSinal
   }
+ 
+  // ...and so on
+  setTimeout(() => { estimateHands() }, 1000 / config.video.fps)
+}
+
+
 
 async function initCamera(width, height, fps) {
 
@@ -96,40 +96,41 @@ async function initCamera(width, height, fps) {
   })
 }
 
+/*
 function habilitaBotao() {
   const cards = document.querySelectorAll('[data-card-button]')
   //console.log(cards)
   for (let i = 0; i < cards.length; i++) {
-      cards[i].removeAttribute('disabled')
-      proximoCard()
-      }     
+    cards[i].removeAttribute('disabled')
+    proximoCard()
+  }
 }
 
 function proximoCard() {
   const buttons = document.querySelectorAll('[data-card-button]')
 
-  
-    for (let i = 0; i < buttons.length; i++) {
-        buttons[i].addEventListener('click', function(botao) {
-          const abaAlvo = botao.target.dataset.tabButton
-          const aba = document.querySelector(`[data-card-id=${abaAlvo}]`)
-          aba.classList.add('is-active')
-        })
-      
-      
+
+  for (let i = 0; i < buttons.length; i++) {
+    buttons[i].addEventListener('click', function (botao) {
+      const abaAlvo = botao.target.dataset.tabButton
+      const aba = document.querySelector(`[data-card-id=${abaAlvo}]`)
+      aba.classList.add('is-active')
+    })
+
+
   }
 }
-
+*/
 window.addEventListener("DOMContentLoaded", () => {
- 
+
   initCamera(
     config.video.width, config.video.height, config.video.fps
   ).then(video => {
     video.play()
     video.addEventListener("loadeddata", event => {
       console.log("Camera is ready")
-      console.log(estimateHands())
-    
+      
+      estimateHands()
     })
   })
 
@@ -137,6 +138,6 @@ window.addEventListener("DOMContentLoaded", () => {
   canvas.width = config.video.width
   canvas.height = config.video.height
   console.log("Canvas initialized")
- 
+
 });
 
