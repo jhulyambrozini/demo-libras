@@ -1,0 +1,59 @@
+* {
+    box-sizing: border-box;
+    user-select: none;
+  }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    color: #333333;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    margin: 20px auto;
+    display: flex;
+  }
+
+  .video {
+    padding: 0 20px;
+  }
+
+  #video-container {
+    width: 640px;
+    height: 480px;
+    position: relative;
+  }
+
+  .card {
+    background-color: #ffffff;
+    color: #333;
+    border-radius: 5px;
+    text-align: center;
+  }
+
+  .card
+  .test {
+    color: red;
+  }
+
+  .ponts {
+    display: block;
+    border: 1px solid #333;
+    background-color: #f1f1f1;
+    height: 300px;
+    width: 100%;
+  }
+
+  .is-active {
+    display: block;
+    opacity: 1;
+  }
